@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Radial gradient utility for dot pattern background */
+.bg-gradient-radial {
+  background: radial-gradient(var(--tw-gradient-stops));
+}
