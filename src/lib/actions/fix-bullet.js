@@ -1,8 +1,7 @@
 "use server";
 
-import { generateObject } from "ai";
 import { z } from "zod";
-import { openai, getBulletFixPrompt } from "@/lib/ai";
+import { getBulletFixPrompt, requestJsonCompletion } from "@/lib/ai";
 
 const bulletFixSchema = z.object({
   variations: z.array(z.string()).length(3),
@@ -15,11 +14,10 @@ const bulletFixSchema = z.object({
  */
 export async function fixBulletPoint(bulletText) {
   try {
-    const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      schema: bulletFixSchema,
-      prompt: getBulletFixPrompt(bulletText),
-    });
+    const object = await requestJsonCompletion(
+      getBulletFixPrompt(bulletText),
+      bulletFixSchema
+    );
 
     return { success: true, data: object };
   } catch (error) {

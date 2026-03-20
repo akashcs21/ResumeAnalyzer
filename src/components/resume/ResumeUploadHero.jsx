@@ -14,6 +14,8 @@ import {
 import SplitText from "@/components/ui/SplitText";
 import TextType from "@/components/ui/TextType";
 
+const DEMO_USER_ID = "00000000-0000-0000-0000-000000000001";
+
 // ─── Dot Pattern Background ──────────────────────────────────────────────────
 function DotPattern() {
   return (
@@ -230,7 +232,7 @@ export default function ResumeUploadHero({ userId }) {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("userId", userId || "demo-user-id");
+        formData.append("userId", userId || DEMO_USER_ID);
 
         const res = await fetch("/api/upload", {
           method: "POST",

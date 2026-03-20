@@ -1,8 +1,7 @@
 import ResumeUploadHero from "@/components/resume/ResumeUploadHero";
 
-export default function HomePage() {
-  // TODO: Get actual userId from Clerk auth
-  const userId = "demo-user-id";
+const DEMO_USER_ID = "00000000-0000-0000-0000-000000000001";
 
-  return <ResumeUploadHero userId={userId} />;
+export default function HomePage() {
+  return <ResumeUploadHero userId={DEMO_USER_ID} />;
 }

@@ -1,16 +1,27 @@
+import { eq } from "drizzle-orm";
+import { analyzeResume } from "@/lib/actions/analyze";
 import { db } from "@/lib/db";
-import { chats } from "@/lib/db/schema";
+import { chats, users } from "@/lib/db/schema";
 import { parsePDF } from "@/lib/pdf";
+
+const DEFAULT_USER_ID = "00000000-0000-0000-0000-000000000001";
 
 export async function POST(req) {
   try {
     const formData = await req.formData();
     const file = formData.get("file");
-    const userId = formData.get("userId");
+    const incomingUserId = formData.get("userId");
+    const userId =
+      typeof incomingUserId === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        incomingUserId
+      )
+        ? incomingUserId
+        : DEFAULT_USER_ID;
 
-    if (!file || !userId) {
+    if (!file) {
       return new Response(
-        JSON.stringify({ error: "File and userId are required" }),
+        JSON.stringify({ error: "File is required" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -26,6 +37,26 @@ export async function POST(req) {
       );
     }
 
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!existingUser) {
+      await db.insert(users).values({
+        id: userId,
+        email: `demo+${userId}@resume-analyzer.local`,
+      });
+    }
+
+    const analysisResult = await analyzeResume(resumeText);
+
+    if (!analysisResult.success) {
+      return new Response(
+        JSON.stringify({ error: analysisResult.error }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     // Create a new chat with the resume text
     const [newChat] = await db
       .insert(chats)
@@ -33,6 +64,8 @@ export async function POST(req) {
         userId,
         title: file.name.replace(".pdf", ""),
         resumeText,
+        analysis: analysisResult.data,
+        analysisCreatedAt: new Date(),
       })
       .returning();
 
@@ -41,6 +74,7 @@ export async function POST(req) {
         chatId: newChat.id,
         resumeText,
         title: newChat.title,
+        analysis: analysisResult.data,
       }),
       { status: 201, headers: { "Content-Type": "application/json" } }
     );

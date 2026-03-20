@@ -5,6 +5,8 @@ import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import { Upload, FileText, Loader2, CheckCircle2 } from "lucide-react";
 
+const DEMO_USER_ID = "00000000-0000-0000-0000-000000000001";
+
 export default function ResumeUpload({ userId }) {
   const router = useRouter();
   const [status, setStatus] = useState("idle"); // idle | uploading | success | error
@@ -23,7 +25,7 @@ export default function ResumeUpload({ userId }) {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("userId", userId);
+        formData.append("userId", userId || DEMO_USER_ID);
 
         const res = await fetch("/api/upload", {
           method: "POST",

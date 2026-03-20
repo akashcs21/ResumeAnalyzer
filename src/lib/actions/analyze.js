@@ -1,8 +1,7 @@
 "use server";
 
-import { generateObject } from "ai";
 import { z } from "zod";
-import { openai, getAnalysisPrompt } from "@/lib/ai";
+import { getAnalysisPrompt, requestJsonCompletion } from "@/lib/ai";
 
 // Zod schema to enforce the exact JSON structure from the LLM
 const analysisSchema = z.object({
@@ -25,11 +24,10 @@ const analysisSchema = z.object({
  */
 export async function analyzeResume(resumeText, jobDescription = "") {
   try {
-    const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      schema: analysisSchema,
-      prompt: getAnalysisPrompt(resumeText, jobDescription),
-    });
+    const object = await requestJsonCompletion(
+      getAnalysisPrompt(resumeText, jobDescription),
+      analysisSchema
+    );
 
     return { success: true, data: object };
   } catch (error) {
