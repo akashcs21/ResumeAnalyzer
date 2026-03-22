@@ -11,6 +11,7 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
   const [isInterviewMode, setIsInterviewMode] = useState(false);
   const [isRoastMode, setIsRoastMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const scrollRef = useRef(null);
   const recognitionRef = useRef(null);
   
@@ -99,10 +100,32 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
     }
   }, [messages, isLoading]);
 
-  async function handleSubmit(event) {
+  const speakText = (text) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel(); // Stop current speech
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.05;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    if (!isInterviewMode && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, [isInterviewMode]);
+
+  async function handleSubmit(event, overrideContent = null) {
     if (event) event.preventDefault();
 
-    const content = input.trim();
+    const content = overrideContent !== null ? overrideContent : input.trim();
     if (!content || isLoading) {
       return;
     }
@@ -174,6 +197,11 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
           );
         }
       }
+      
+      if (isInterviewMode || isRoastMode) {
+        speakText(assistantContent);
+      }
+      
     } catch (submitError) {
       setError(submitError.message || "Failed to send message");
       // Optionally comment out if you want to keep the error message in the thread
@@ -217,7 +245,16 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
           alignItems: "center",
         }}
       >
-        <span>{isRoastMode ? "Brutal Recruiter 🔥" : isInterviewMode ? "Mock Interviewer" : "Resume Copilot"}</span>
+        <span className="flex items-center gap-2">
+          {isRoastMode ? "Brutal Recruiter 🔥" : isInterviewMode ? "Mock Interviewer" : "Resume Copilot"}
+          {isSpeaking && (
+            <span className="flex items-center gap-1 ml-1" title="AI is speaking">
+              <span className="w-1.5 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-4 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-2.5 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+            </span>
+          )}
+        </span>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
             onClick={() => {
@@ -248,8 +285,15 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
           
           <button
             onClick={() => {
-              setIsInterviewMode(!isInterviewMode);
-              if (!isInterviewMode) setIsRoastMode(false);
+              const newInterviewState = !isInterviewMode;
+              setIsInterviewMode(newInterviewState);
+              if (newInterviewState) {
+                setIsRoastMode(false);
+                // Auto start the interview if no previous messages
+                if (messages.length === 0) {
+                  handleSubmit(null, "I am ready for the mock interview. Please begin by asking me a tough question about the biggest weakness or missing metric you see in my resume. Speak as the interviewer.");
+                }
+              }
             }}
             style={{
               background: isInterviewMode ? "rgba(249, 115, 22, 0.2)" : "rgba(148, 163, 184, 0.1)",
