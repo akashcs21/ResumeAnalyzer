@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Wand2, Copy, Check, Loader2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { fixBulletPoint } from "@/lib/actions/fix-bullet";
 
 export default function MagicWandButton({ bulletText }) {
@@ -41,7 +42,9 @@ export default function MagicWandButton({ bulletText }) {
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       {/* Wand Button */}
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={handleClick}
         title="Fix this bullet point with AI"
         style={{
@@ -58,29 +61,36 @@ export default function MagicWandButton({ bulletText }) {
           color: isOpen ? "#fff" : "#6366f1",
           fontSize: "12px",
           fontWeight: 500,
-          transition: "all 0.2s ease",
+          transition: "background 0.2s ease, border 0.2s ease",
         }}
       >
-        <Wand2 size={14} />
+        <motion.div animate={{ rotate: isOpen ? 45 : 0 }} transition={{ duration: 0.3 }}>
+          <Wand2 size={14} />
+        </motion.div>
         Fix it
-      </button>
+      </motion.button>
 
       {/* Dropdown Popover */}
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 8px)",
-            left: 0,
-            zIndex: 50,
-            width: "400px",
-            background: "#fff",
-            borderRadius: "12px",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
-            padding: "16px",
-          }}
-        >
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              left: 0,
+              zIndex: 50,
+              width: "400px",
+              background: "#fff",
+              borderRadius: "12px",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
+              padding: "16px",
+            }}
+          >
           {/* Header */}
           <div
             style={{
@@ -217,8 +227,9 @@ export default function MagicWandButton({ bulletText }) {
                 </button>
               </div>
             ))}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
         @keyframes spin {

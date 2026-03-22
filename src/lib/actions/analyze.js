@@ -3,11 +3,12 @@
 import { z } from "zod";
 import { getAnalysisPrompt, requestJsonCompletion } from "@/lib/ai";
 
-// Zod schema to enforce the exact JSON structure from the LLM
 const analysisSchema = z.object({
   score: z.number().min(0).max(100),
   missingKeywords: z.array(z.string()),
   formattingIssues: z.array(z.string()),
+  softSkills: z.array(z.string()),
+  careerTransitionAdvice: z.string().optional(),
   suggestedBulletPoints: z.array(
     z.object({
       original: z.string(),
@@ -19,13 +20,13 @@ const analysisSchema = z.object({
 /**
  * Analyze a resume and return a structured ATS score with feedback.
  * @param {string} resumeText - The raw text from the resume PDF
- * @param {string} [jobDescription] - Optional job description to compare against
- * @returns {Promise<{ score: number, missingKeywords: string[], formattingIssues: string[], suggestedBulletPoints: { original: string, improved: string }[] }>}
+ * @param {string} [targetRole] - Optional target role for career transition mode
+ * @returns {Promise<{ score: number, missingKeywords: string[], formattingIssues: string[], softSkills: string[], careerTransitionAdvice: string, suggestedBulletPoints: { original: string, improved: string }[] }>}
  */
-export async function analyzeResume(resumeText, jobDescription = "") {
+export async function analyzeResume(resumeText, targetRole = "") {
   try {
     const object = await requestJsonCompletion(
-      getAnalysisPrompt(resumeText, jobDescription),
+      getAnalysisPrompt(resumeText, targetRole),
       analysisSchema
     );
 

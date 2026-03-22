@@ -19,9 +19,17 @@ export default function TextType({
   style = {},
 }) {
   const combinedTexts = text.length > 0 ? text : texts;
-  const [displayText, setDisplayText] = useState("");
+  const [displayText, setDisplayText] = useState(combinedTexts?.[0]?.charAt(0) || "");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!combinedTexts?.length) {
+      return;
+    }
+
+    setDisplayText((current) => current || combinedTexts[0].charAt(0));
+  }, [combinedTexts]);
 
   useEffect(() => {
     if (!combinedTexts || combinedTexts.length === 0) return;

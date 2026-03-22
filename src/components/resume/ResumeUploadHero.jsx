@@ -291,7 +291,7 @@ export default function ResumeUploadHero({ userId }) {
                   "Beat the ATS Systems",
                   "Land More Interviews",
                 ]}
-                className="bg-clip-text text-transparent bg-[linear-gradient(135deg,#818cf8,#a78bfa,#f472b6,#818cf8)] bg-[length:200%_auto] animate-border-beam pb-3"
+                className="bg-clip-text text-transparent bg-[linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899,#6366f1)] bg-[length:200%_auto] animate-border-beam pb-3"
                 typingSpeed={130}
                 pauseDuration={1500}
                 showCursor={true}
@@ -303,7 +303,7 @@ export default function ResumeUploadHero({ userId }) {
                 cursorBlinkDuration={0.8}
               />
               <br className="hidden md:block" />
-              <span className="text-white">In Seconds</span>
+              <span className="bg-clip-text text-transparent bg-[linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899,#6366f1)] bg-[length:200%_auto] animate-border-beam">In Seconds</span>
             </h1>
 
             <motion.p

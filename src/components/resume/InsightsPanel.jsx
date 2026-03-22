@@ -3,9 +3,11 @@
 import { useState } from "react";
 
 const tabs = [
+  { id: "softskills", label: "Soft Skills" },
   { id: "keywords", label: "Keywords" },
   { id: "issues", label: "Issues" },
   { id: "rewrites", label: "Rewrites" },
+  { id: "transition", label: "Transition" },
 ];
 
 function TabButton({ active, label, onClick }) {
@@ -33,28 +35,40 @@ export default function InsightsPanel({
   missingKeywords = [],
   formattingIssues = [],
   suggestedBulletPoints = [],
+  softSkills = [],
+  careerTransitionAdvice = "",
+  isPending = false,
 }) {
   const [activeTab, setActiveTab] = useState("keywords");
 
+  const uniqueKeywords = [...new Set(missingKeywords)];
+  const uniqueSoftSkills = [...new Set(softSkills)];
+
   const counts = {
-    keywords: missingKeywords.length,
+    softskills: uniqueSoftSkills.length,
+    keywords: uniqueKeywords.length,
     issues: formattingIssues.length,
     rewrites: suggestedBulletPoints.length,
+    transition: careerTransitionAdvice ? 1 : 0,
   };
 
   return (
     <section
       style={{
         height: "100%",
+        minHeight: 0,
         borderRadius: "28px",
         border: "1px solid rgba(148, 163, 184, 0.14)",
         background: "linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.72))",
         backdropFilter: "blur(18px)",
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <div
         style={{
+          flexShrink: 0,
           padding: "18px 20px 12px",
           borderBottom: "1px solid rgba(148, 163, 184, 0.1)",
         }}
@@ -86,15 +100,78 @@ export default function InsightsPanel({
 
       <div
         style={{
-          height: "calc(100% - 88px)",
+          height: "380px", // Fixed height to prevent layout shift
           overflowY: "auto",
           padding: "18px 20px 20px",
         }}
       >
-        {activeTab === "keywords" && (
-          missingKeywords.length ? (
+        {isPending ? (
+          <div
+            style={{
+              borderRadius: "18px",
+              border: "1px dashed rgba(148, 163, 184, 0.2)",
+              background: "rgba(15, 23, 42, 0.35)",
+              color: "#94a3b8",
+              padding: "18px",
+              lineHeight: 1.6,
+            }}
+          >
+            AI analysis is running now. You can start chatting immediately, and the keyword gaps,
+            formatting issues, and rewrite suggestions will appear here when processing finishes.
+          </div>
+        ) : null}
+
+        {!isPending && activeTab === "softskills" && (
+          uniqueSoftSkills.length ? (
             <div className="flex flex-wrap gap-2">
-              {missingKeywords.map((keyword) => (
+              {uniqueSoftSkills.map((skill) => (
+                <span
+                  key={skill}
+                  style={{
+                    padding: "9px 12px",
+                    borderRadius: "999px",
+                    background: "rgba(167, 139, 250, 0.15)",
+                    border: "1px solid rgba(167, 139, 250, 0.3)",
+                    color: "#c4b5fd",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                  }}
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: "#94a3b8", margin: 0 }}>No soft skills detected.</p>
+          )
+        )}
+
+        {!isPending && activeTab === "transition" && (
+          careerTransitionAdvice ? (
+            <div
+              style={{
+                borderRadius: "18px",
+                padding: "16px",
+                background: "rgba(30, 41, 59, 0.8)",
+                border: "1px solid rgba(14, 165, 233, 0.2)",
+                color: "#bae6fd",
+                lineHeight: 1.6,
+                fontSize: "14px",
+              }}
+            >
+              {careerTransitionAdvice}
+            </div>
+          ) : (
+            <p style={{ color: "#94a3b8", margin: 0 }}>
+              No transition advice requested or provided. Make sure to specify a Target Role.
+            </p>
+          )
+        )}
+
+        {!isPending && activeTab === "keywords" && (
+          uniqueKeywords.length ? (
+            <div className="flex flex-wrap gap-2">
+              {uniqueKeywords.map((keyword) => (
                 <span
                   key={keyword}
                   style={{
@@ -115,7 +192,7 @@ export default function InsightsPanel({
           )
         )}
 
-        {activeTab === "issues" && (
+        {!isPending && activeTab === "issues" && (
           formattingIssues.length ? (
             <div className="flex flex-col gap-3">
               {formattingIssues.map((issue, index) => (
@@ -140,7 +217,7 @@ export default function InsightsPanel({
           )
         )}
 
-        {activeTab === "rewrites" && (
+        {!isPending && activeTab === "rewrites" && (
           suggestedBulletPoints.length ? (
             <div className="flex flex-col gap-3">
               {suggestedBulletPoints.map((item, index) => (

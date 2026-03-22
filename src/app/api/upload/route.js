@@ -1,10 +1,27 @@
 import { eq } from "drizzle-orm";
-import { analyzeResume } from "@/lib/actions/analyze";
 import { db } from "@/lib/db";
 import { chats, users } from "@/lib/db/schema";
 import { parsePDF } from "@/lib/pdf";
 
 const DEFAULT_USER_ID = "00000000-0000-0000-0000-000000000001";
+
+function redactPersonalData(text) {
+  if (!text) return "";
+  
+  // Redact email addresses
+  let redacted = text.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[REDACTED_EMAIL]");
+  
+  // Redact phone numbers (looks for 10-15 digits separated by common delimiters)
+  redacted = redacted.replace(/(\+?\d{1,4}?[-.\s]?\(?\d{1,4}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9})/g, (match) => {
+    const digitCount = (match.match(/\d/g) || []).length;
+    if (digitCount >= 10 && digitCount <= 15) {
+      return "[REDACTED_PHONE]";
+    }
+    return match;
+  });
+
+  return redacted;
+}
 
 export async function POST(req) {
   try {
@@ -28,7 +45,8 @@ export async function POST(req) {
 
     // Convert file to buffer and extract text
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { text: resumeText } = await parsePDF(buffer);
+    const { text: rawText } = await parsePDF(buffer);
+    const resumeText = redactPersonalData(rawText);
 
     if (!resumeText || resumeText.trim().length === 0) {
       return new Response(
@@ -48,15 +66,6 @@ export async function POST(req) {
       });
     }
 
-    const analysisResult = await analyzeResume(resumeText);
-
-    if (!analysisResult.success) {
-      return new Response(
-        JSON.stringify({ error: analysisResult.error }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
     // Create a new chat with the resume text
     const [newChat] = await db
       .insert(chats)
@@ -64,8 +73,6 @@ export async function POST(req) {
         userId,
         title: file.name.replace(".pdf", ""),
         resumeText,
-        analysis: analysisResult.data,
-        analysisCreatedAt: new Date(),
       })
       .returning();
 
@@ -74,7 +81,7 @@ export async function POST(req) {
         chatId: newChat.id,
         resumeText,
         title: newChat.title,
-        analysis: analysisResult.data,
+        analysisPending: true,
       }),
       { status: 201, headers: { "Content-Type": "application/json" } }
     );

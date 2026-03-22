@@ -1,23 +1,43 @@
-import axios from "axios";
+import OpenAI from "openai";
 
-const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const NVIDIA_MODEL = "mistralai/mistral-large-3-675b-instruct-2512";
+const NVIDIA_MODEL = "nvidia/nemotron-3-super-120b-a12b";
 
-function getAuthHeaders() {
+function getClient() {
   const apiKey = process.env.NVIDIA_API_KEY;
 
   if (!apiKey) {
     throw new Error("NVIDIA_API_KEY is not configured");
   }
 
-  return {
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  };
+  return new OpenAI({
+    apiKey,
+    baseURL: "https://integrate.api.nvidia.com/v1",
+  });
 }
 
-function extractMessageContent(data) {
-  return data?.choices?.[0]?.message?.content?.trim() || "";
+function extractTextContent(content) {
+  if (typeof content === "string") {
+    return content.trim();
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => {
+        if (typeof part === "string") {
+          return part;
+        }
+
+        if (part?.type === "text") {
+          return part.text || "";
+        }
+
+        return "";
+      })
+      .join("")
+      .trim();
+  }
+
+  return "";
 }
 
 function extractJsonBlock(text) {
@@ -37,26 +57,39 @@ function extractJsonBlock(text) {
   return trimmed.slice(start, end + 1);
 }
 
-export async function requestChatCompletion(messages, options = {}) {
-  const response = await axios.post(
-    NVIDIA_API_URL,
-    {
-      model: NVIDIA_MODEL,
-      messages,
-      max_tokens: options.maxTokens ?? 2048,
-      temperature: options.temperature ?? 0.15,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      stream: false,
+function getChatOptions(options = {}) {
+  return {
+    model: NVIDIA_MODEL,
+    temperature: options.temperature ?? 1,
+    top_p: options.topP ?? 0.95,
+    max_tokens: options.maxTokens ?? 16384,
+    reasoning_budget: options.reasoningBudget ?? 16384,
+    chat_template_kwargs: {
+      enable_thinking: options.enableThinking ?? true,
     },
-    {
-      headers: getAuthHeaders(),
-      timeout: 120000,
-    }
-  );
+  };
+}
 
-  return extractMessageContent(response.data);
+export async function requestChatCompletion(messages, options = {}) {
+  const client = getClient();
+
+  const completion = await client.chat.completions.create({
+    ...getChatOptions(options),
+    messages,
+    stream: false,
+  });
+
+  return extractTextContent(completion.choices?.[0]?.message?.content);
+}
+
+export async function createChatCompletionStream(messages, options = {}) {
+  const client = getClient();
+
+  return client.chat.completions.create({
+    ...getChatOptions(options),
+    messages,
+    stream: true,
+  });
 }
 
 export async function requestJsonCompletion(prompt, schema) {
@@ -65,13 +98,16 @@ export async function requestJsonCompletion(prompt, schema) {
       {
         role: "system",
         content:
-          "Return only valid JSON. Do not use markdown, commentary, or code fences.",
+          "Return only valid JSON. Do not use markdown, commentary, code fences, or explanations.",
       },
       { role: "user", content: prompt },
     ],
     {
-      temperature: 0.1,
-      maxTokens: 2048,
+      temperature: 0.2,
+      topP: 0.7,
+      maxTokens: 4096,
+      reasoningBudget: 0,
+      enableThinking: false,
     }
   );
 
@@ -93,15 +129,29 @@ Your responsibilities:
 2. Assess bullet points using the STAR method and flag vague or unquantified claims.
 3. Recommend concrete, high-signal resume improvements.
 4. Answer follow-up questions strictly in the context of the uploaded resume.
-5. Be direct, specific, and actionable.`;
+5. EXTREMELY IMPORTANT: Keep your responses incredibly concise. Use bullet points where possible and never exceed 3-4 short paragraphs. Cut the fluff.`;
 }
 
-export function getAnalysisPrompt(resumeText, jobDescription) {
-  const jobContext = jobDescription
-    ? `\n\nThe candidate is targeting this job:\n<job_description>\n${jobDescription}\n</job_description>`
+export function getInterviewPrompt(resumeText) {
+  return `You are a tough but fair technical interviewer. You have just been handed this candidate's resume:
+
+<resume>
+${resumeText}
+</resume>
+
+Your responsibilities:
+1. Act exclusively as the interviewer. Cross-examine the candidate on specific claims made in their resume.
+2. Ask one concise, challenging follow-up question at a time.
+3. If they claim to have 'reduced latency by 50%', ask exactly HOW they measured and achieved that.
+4. Keep your responses under 3 sentences. Cut the fluff. Do not break character.`;
+}
+
+export function getAnalysisPrompt(resumeText, targetRole) {
+  const jobContext = targetRole
+    ? `\n\nThe candidate is targeting this new role: <target_role>\n${targetRole}\n</target_role>. Provide actionable advice on how to transition their past experience into this new domain.`
     : "";
 
-  return `You are an ATS scoring engine. Analyze the resume below and return ONLY valid JSON.
+  return `You are an ATS scoring engine and career transition coach. Analyze the resume below and return ONLY valid JSON.
 ${jobContext}
 
 <resume>
@@ -113,8 +163,10 @@ Return this exact JSON structure:
   "score": <number 0-100>,
   "missingKeywords": [<string>, ...],
   "formattingIssues": [<string>, ...],
+  "softSkills": ["extract 3-5 high-level semantic soft skills inferred from their achievements", ...],
+  "careerTransitionAdvice": "<if target_role is provided, suggest how to frame existing experience; else omit or leave empty string>",
   "suggestedBulletPoints": [
-    { "original": "<original line>", "improved": "<improved version using STAR method>" }
+    { "original": "<original line>", "improved": "<improved version using STAR method (XYZ format)>" }
   ]
 }
 
@@ -123,7 +175,9 @@ Scoring rubric:
 - Quantified achievements (STAR method): 25 points
 - Formatting and ATS parsability: 20 points
 - Section completeness: 15 points
-- Overall clarity and impact: 10 points`;
+- Overall clarity and impact: 10 points
+
+Important: For formatting issues, analyze the text structure. For softSkills, do NOT just list words they wrote; read between the lines (e.g., 'reduced load time' -> 'Performance Optimization', 'led team of 5' -> 'Leadership').`;
 }
 
 export function getBulletFixPrompt(bulletText) {
@@ -147,4 +201,19 @@ Return ONLY valid JSON:
     "<variation 3>"
   ]
 }`;
+}
+
+export function getRoastPrompt(resumeText) {
+  return `You are a brutally honest, highly critical, yet ultimately helpful tech recruiter. Your job is to ROAST the candidate's resume. 
+
+<resume>
+${resumeText}
+</resume>
+
+Your responsibilities:
+1. Be playfully harsh and sarcastic. Tear apart cliché corporate jargon (like 'results-driven team player').
+2. Point out obvious padding, weak power verbs, or lack of metrics.
+3. Keep it funny but provide actual actionable advice disguised as insults.
+4. Use emojis like 🔥, 💀, 🤡 where appropriate to emphasize your roast.
+5. EXTREMELY IMPORTANT: Keep your roast painfully short and punchy. Never exceed 3-4 sentences total. Get straight to the burn.`;
 }
