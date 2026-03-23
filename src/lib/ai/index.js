@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-const NVIDIA_MODEL = "nvidia/nemotron-3-super-120b-a12b";
+const NVIDIA_MODEL = "meta/llama-3.1-70b-instruct";
 
 function getClient() {
   const apiKey = process.env.NVIDIA_API_KEY;

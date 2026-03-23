@@ -15,6 +15,7 @@ function TabButton({ active, label, onClick }) {
     <button
       type="button"
       onClick={onClick}
+      className="transition-transform hover:scale-105 active:scale-95"
       style={{
         border: "1px solid rgba(148, 163, 184, 0.14)",
         borderRadius: "999px",

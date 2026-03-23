@@ -10,6 +10,7 @@ import {
   Sparkles,
   CheckCircle2,
   ArrowRight,
+  Lock,
 } from "lucide-react";
 import SplitText from "@/components/ui/SplitText";
 import TextType from "@/components/ui/TextType";
@@ -224,6 +225,11 @@ export default function ResumeUploadHero({ userId }) {
       const file = acceptedFiles[0];
       if (!file) return;
 
+      if (!userId || userId === DEMO_USER_ID) {
+        router.push("/login");
+        return;
+      }
+
       setFileName(file.name);
       setStatus("scanning");
       setErrorMsg("");
@@ -259,12 +265,23 @@ export default function ResumeUploadHero({ userId }) {
     [userId, router, simulateScan],
   );
 
+  const isUnauthenticated = !userId || userId === DEMO_USER_ID;
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "application/pdf": [".pdf"] },
     maxFiles: 1,
     disabled: status === "scanning",
+    noClick: isUnauthenticated,
+    noKeyboard: isUnauthenticated,
   });
+
+  const handleContainerClick = (e) => {
+    if (isUnauthenticated) {
+      e.stopPropagation();
+      router.push("/login");
+    }
+  };
 
   return (
     <section
@@ -327,6 +344,7 @@ export default function ResumeUploadHero({ userId }) {
 
               <div
                 {...getRootProps()}
+                onClickCapture={handleContainerClick}
                 className={`
                   relative z-20 rounded-2xl border-2 border-dashed p-10
                   transition-all duration-300 cursor-pointer
@@ -347,14 +365,24 @@ export default function ResumeUploadHero({ userId }) {
                 {status === "idle" && (
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                      <Upload className="w-6 h-6 text-indigo-400" />
+                      {isUnauthenticated ? (
+                        <Lock className="w-6 h-6 text-indigo-400" />
+                      ) : (
+                        <Upload className="w-6 h-6 text-indigo-400" />
+                      )}
                     </div>
                     <div className="text-center">
                       <p className="text-white font-semibold text-lg">
-                        {isDragActive ? "Drop it here!" : "Upload your resume"}
+                        {isUnauthenticated
+                          ? "Sign in to upload resume"
+                          : isDragActive
+                            ? "Drop it here!"
+                            : "Upload your resume"}
                       </p>
                       <p className="text-slate-500 text-sm mt-1">
-                        Drag & drop a PDF, or click to browse
+                        {isUnauthenticated
+                          ? "Unlock AI analysis and tracking"
+                          : "Drag & drop a PDF, or click to browse"}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-600">

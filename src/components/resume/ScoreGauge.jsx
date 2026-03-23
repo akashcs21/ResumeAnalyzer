@@ -40,7 +40,10 @@ export default function ScoreGauge({ score = 0, size = 200 }) {
   const color = getColor(currentScore);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.2 }}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -127,6 +130,6 @@ export default function ScoreGauge({ score = 0, size = 200 }) {
       >
         {getLabel(currentScore)}
       </span>
-    </div>
+    </motion.div>
   );
 }

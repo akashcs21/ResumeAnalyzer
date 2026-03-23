@@ -27,6 +27,7 @@ function SkeletonBlock({ width = "100%", height = 16, radius = 12, style = {} })
 function DetailPill({ children, tone = "rgba(148, 163, 184, 0.16)", color = "#cbd5e1" }) {
   return (
     <span
+      className="transition-transform hover:scale-105"
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -37,6 +38,7 @@ function DetailPill({ children, tone = "rgba(148, 163, 184, 0.16)", color = "#cb
         fontSize: "12px",
         lineHeight: 1,
         whiteSpace: "nowrap",
+        cursor: "default"
       }}
     >
       {children}
@@ -134,6 +136,7 @@ export default async function ChatPage({ params }) {
         <MagicBentoItem
           className="col-span-12 xl:col-span-6"
           style={{ padding: "22px 24px" }}
+          index={0}
         >
             <div className="flex h-full items-center gap-5">
               <div className="shrink-0">
@@ -207,7 +210,7 @@ export default async function ChatPage({ params }) {
             </div>
           </MagicBentoItem>
 
-        <MagicBentoItem className="col-span-6 xl:col-span-2" style={{ padding: "22px" }}>
+        <MagicBentoItem className="col-span-6 xl:col-span-2" style={{ padding: "22px" }} index={1}>
           {analysisPending ? (
             <div className="flex h-full flex-col justify-between gap-4">
               <SkeletonBlock width="34%" height={12} radius={8} />
@@ -236,7 +239,7 @@ export default async function ChatPage({ params }) {
           )}
         </MagicBentoItem>
 
-        <MagicBentoItem className="col-span-6 xl:col-span-2" style={{ padding: "22px" }}>
+        <MagicBentoItem className="col-span-6 xl:col-span-2" style={{ padding: "22px" }} index={2}>
           {analysisPending ? (
             <div className="flex h-full flex-col justify-between gap-4">
               <SkeletonBlock width="26%" height={12} radius={8} />
@@ -264,7 +267,7 @@ export default async function ChatPage({ params }) {
           )}
         </MagicBentoItem>
 
-        <MagicBentoItem className="col-span-12 xl:col-span-2" style={{ padding: "22px" }}>
+        <MagicBentoItem className="col-span-12 xl:col-span-2" style={{ padding: "22px" }} index={3}>
           {analysisPending ? (
             <div className="flex h-full flex-col justify-between gap-4">
               <SkeletonBlock width="34%" height={12} radius={8} />
@@ -295,6 +298,7 @@ export default async function ChatPage({ params }) {
         <MagicBentoItem
           className="col-span-12 xl:col-span-3 min-h-0 xl:h-full"
           style={{ padding: "0", overflow: "hidden" }}
+          index={4}
         >
           <div className="flex h-full min-h-0 flex-col">
             <AnalysisBootstrapper chatId={chat.id} shouldAnalyze={analysisPending} />
@@ -312,6 +316,7 @@ export default async function ChatPage({ params }) {
         <MagicBentoItem
           className="col-span-12 xl:col-span-9 min-h-0"
           style={{ padding: "0", overflow: "hidden" }}
+          index={5}
         >
           <ChatWindow chatId={chat.id} initialMessages={initialMessages} />
         </MagicBentoItem>

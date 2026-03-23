@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 function createStars(count) {
   return Array.from({ length: count }, (_, index) => ({
@@ -18,14 +19,19 @@ export function MagicBentoItem({
   className = "",
   style = {},
   textAutoHide = false,
+  index = 0,
 }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 70 }}
       className={`magic-bento-item ${textAutoHide ? "magic-bento-text-auto-hide" : ""} ${className}`.trim()}
       style={style}
+      whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
