@@ -103,13 +103,17 @@ export async function POST(req) {
       });
     }
 
-    // Create a new chat with the resume text
+    // Create a new chat with the resume text and file
+    const resumeBase64 = buffer.toString("base64");
+
     const [newChat] = await db
       .insert(chats)
       .values({
         userId,
         title: file.name.replace(".pdf", ""),
         resumeText,
+        resumeFile: resumeBase64,
+        resumeFileName: file.name,
       })
       .returning();
 

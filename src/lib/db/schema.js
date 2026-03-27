@@ -69,6 +69,8 @@ export const chats = pgTable("chats", {
     .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull().default("Untitled Chat"),
   resumeText: text("resume_text").notNull(),
+  resumeFile: text("resume_file"),
+  resumeFileName: text("resume_file_name"),
   analysis: jsonb("analysis"),
   analysisCreatedAt: timestamp("analysis_created_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
