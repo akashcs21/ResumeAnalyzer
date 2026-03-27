@@ -314,7 +314,7 @@ export default async function ChatPage({ params }) {
         </MagicBentoItem>
 
         <MagicBentoItem
-          className="col-span-12 xl:col-span-9 min-h-0 min-h-[500px] xl:min-h-0"
+          className="col-span-12 xl:col-span-9 h-[70vh] xl:h-auto xl:min-h-0"
           style={{ padding: "0", overflow: "hidden" }}
           index={5}
         >

@@ -352,15 +352,15 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
             key={message.id}
             style={{
               display: "flex",
-              gap: "12px",
+              gap: "8px",
               alignItems: "flex-start",
               flexDirection: message.role === "user" ? "row-reverse" : "row",
             }}
           >
             <div
               style={{
-                width: "36px",
-                height: "36px",
+                width: "30px",
+                height: "30px",
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
@@ -378,11 +378,12 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
 
             <div
               style={{
-                maxWidth: "82%",
-                padding: "14px 18px",
-                borderRadius: "20px",
+                maxWidth: "88%",
+                padding: "10px 14px",
+                borderRadius: "16px",
                 whiteSpace: "pre-wrap",
-                lineHeight: 1.6,
+                lineHeight: 1.55,
+                fontSize: "14px",
                 color: message.role === "user" ? "#fff" : "#e2e8f0",
                 background:
                   message.role === "user"
