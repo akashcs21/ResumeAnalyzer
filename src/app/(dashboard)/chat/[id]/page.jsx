@@ -113,7 +113,7 @@ export default async function ChatPage({ params }) {
 
   return (
     <div
-      className="h-[100dvh] overflow-hidden px-4 py-4 lg:px-6"
+      className="min-h-[100dvh] xl:h-[100dvh] overflow-y-auto xl:overflow-hidden px-3 py-3 sm:px-4 sm:py-4 lg:px-6"
       style={{
         background:
           "radial-gradient(circle at top left, rgba(255, 92, 63, 0.14), transparent 24%), radial-gradient(circle at top right, rgba(0, 148, 255, 0.12), transparent 26%), linear-gradient(180deg, #07101c 0%, #020617 100%)",
@@ -135,10 +135,10 @@ export default async function ChatPage({ params }) {
       >
         <MagicBentoItem
           className="col-span-12 xl:col-span-6"
-          style={{ padding: "22px 24px" }}
+          style={{ padding: "16px" }}
           index={0}
         >
-            <div className="flex h-full items-center gap-5">
+            <div className="flex h-full items-center gap-4 flex-col sm:flex-row text-center sm:text-left">
               <div className="shrink-0">
                 {analysisPending ? (
                   <SkeletonBlock
@@ -171,7 +171,7 @@ export default async function ChatPage({ params }) {
                   </>
                 ) : (
                   <>
-                    <div className="flex items-center gap-4 mb-2">
+                    <div className="flex items-center gap-3 mb-2 justify-center sm:justify-start">
                       <Link 
                         href="/" 
                         className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800/50 hover:bg-slate-700/80 text-slate-400 hover:text-white transition-all shadow-sm flex-shrink-0"
@@ -180,9 +180,9 @@ export default async function ChatPage({ params }) {
                         <Home size={18} />
                       </Link>
                       <div
+                        className="text-lg sm:text-2xl md:text-[28px] truncate"
                         style={{
                           color: "#f8fafc",
-                          fontSize: "28px",
                           fontWeight: 800,
                           lineHeight: 1.1,
                         }}
@@ -190,10 +190,10 @@ export default async function ChatPage({ params }) {
                         {chat.title}
                       </div>
                     </div>
-                    <p style={{ color: "#cbd5e1", margin: 0, lineHeight: 1.65, maxWidth: "56ch" }}>
+                    <p className="hidden sm:block" style={{ color: "#cbd5e1", margin: 0, lineHeight: 1.65, maxWidth: "56ch" }}>
                       Interactive resume workspace. Review metrics, inspect gaps, and use the chat to tailor the resume for specific roles.
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start">
                       <DetailPill tone="rgba(255, 155, 74, 0.16)" color="#ffb977">
                         ATS score {analysis.score}/100
                       </DetailPill>
@@ -210,7 +210,7 @@ export default async function ChatPage({ params }) {
             </div>
           </MagicBentoItem>
 
-        <MagicBentoItem className="col-span-6 xl:col-span-2" style={{ padding: "22px" }} index={1}>
+        <MagicBentoItem className="col-span-12 sm:col-span-6 xl:col-span-2" style={{ padding: "22px" }} index={1}>
           {analysisPending ? (
             <div className="flex h-full flex-col justify-between gap-4">
               <SkeletonBlock width="34%" height={12} radius={8} />
@@ -239,7 +239,7 @@ export default async function ChatPage({ params }) {
           )}
         </MagicBentoItem>
 
-        <MagicBentoItem className="col-span-6 xl:col-span-2" style={{ padding: "22px" }} index={2}>
+        <MagicBentoItem className="col-span-12 sm:col-span-6 xl:col-span-2" style={{ padding: "22px" }} index={2}>
           {analysisPending ? (
             <div className="flex h-full flex-col justify-between gap-4">
               <SkeletonBlock width="26%" height={12} radius={8} />
@@ -296,7 +296,7 @@ export default async function ChatPage({ params }) {
         </MagicBentoItem>
 
         <MagicBentoItem
-          className="col-span-12 xl:col-span-3 min-h-0 xl:h-full"
+          className="col-span-12 xl:col-span-3 min-h-0 xl:h-full min-h-[420px] xl:min-h-0"
           style={{ padding: "0", overflow: "hidden" }}
           index={4}
         >
@@ -314,7 +314,7 @@ export default async function ChatPage({ params }) {
         </MagicBentoItem>
 
         <MagicBentoItem
-          className="col-span-12 xl:col-span-9 min-h-0"
+          className="col-span-12 xl:col-span-9 min-h-0 min-h-[500px] xl:min-h-0"
           style={{ padding: "0", overflow: "hidden" }}
           index={5}
         >

@@ -101,7 +101,9 @@ export default function InsightsPanel({
 
       <div
         style={{
-          height: "380px", // Fixed height to prevent layout shift
+          minHeight: "280px",
+          maxHeight: "380px",
+          flex: 1,
           overflowY: "auto",
           padding: "18px 20px 20px",
         }}

@@ -301,7 +301,7 @@ export default function ResumeUploadHero({ userId }) {
           {/* Left: Copy + Upload Zone */}
           <div className="flex-1 text-center lg:text-left">
             {/* Gradient Heading */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl sm:text-2xl font-extrabold leading-tight mb-6">
               <TextType
                 texts={[
                   "Optimize Your Career",
@@ -320,7 +320,7 @@ export default function ResumeUploadHero({ userId }) {
                 cursorBlinkDuration={0.8}
               />
               <br className="hidden md:block" />
-              <span className="bg-clip-text text-transparent bg-[linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899,#6366f1)] bg-[length:200%_auto] animate-border-beam">In Seconds</span>
+              <span className="sm:text-2xl bg-clip-text text-transparent bg-[linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899,#6366f1)] bg-[length:200%_auto] animate-border-beam">In Seconds</span>
             </h1>
 
             <motion.p

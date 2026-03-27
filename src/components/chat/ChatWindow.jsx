@@ -233,7 +233,7 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
     >
       <div
         style={{
-          padding: "18px 22px",
+          padding: "14px 16px",
           borderBottom: "1px solid rgba(148, 163, 184, 0.1)",
           color: "#e2e8f0",
           fontSize: "13px",
@@ -241,8 +241,10 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           display: "flex",
+          flexWrap: "wrap",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: "8px",
         }}
       >
         <span className="flex items-center gap-2">
@@ -255,7 +257,7 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
             </span>
           )}
         </span>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           <button
             onClick={() => {
               setIsRoastMode(!isRoastMode);
@@ -325,7 +327,7 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
           flex: 1,
           minHeight: 0,
           overflowY: "auto",
-          padding: "22px",
+          padding: "14px 16px",
           display: "flex",
           flexDirection: "column",
           gap: "18px",
@@ -431,7 +433,7 @@ export default function ChatWindow({ chatId, initialMessages = [] }) {
       <form
         onSubmit={handleSubmit}
         style={{
-          padding: "16px",
+          padding: "12px",
           borderTop: "1px solid rgba(148, 163, 184, 0.1)",
           background: "rgba(15, 23, 42, 0.9)",
         }}
